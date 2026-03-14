@@ -30,7 +30,7 @@
 
 <div id="modalRekap" class="modal">
     <div class="modal-content">
-        <h3>📊 Rekap Harian</h3>
+        <h3>📊 Rekap Harian (Ambil, Waste, TF)</h3>
         <div id="rekapTableArea"></div>
         <button onclick="salinRekapTeks()" style="background:#10b981; margin-top:10px;">📋 SALIN TEKS WA</button>
         <button onclick="tutupModal()" style="background:#64748b; margin-top:5px;">TUTUP</button>
@@ -41,8 +41,8 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin:0; color:#1e293b;">SISTOK CIPINANG PRO ✨</h2>
         <div>
-            <button style="background: #f59e0b; width:auto;" onclick="bukaRekap()">📊 REKAP</button>
-            <button style="background: #1e293b; width:auto;" onclick="cetakExcel()">📥 EXCEL</button>
+            <button style="background: #f59e0b; width:auto; padding:8px 15px;" onclick="bukaRekap()">📊 REKAP</button>
+            <button style="background: #1e293b; width:auto; padding:8px 15px;" onclick="cetakExcel()">📥 EXCEL</button>
         </div>
     </div>
 
@@ -76,7 +76,7 @@
                     <input type="number" id="qtyTf" placeholder="Qty">
                     <select id="satuanTf"></select>
                 </div>
-                <input type="text" id="ketTf" placeholder="Keterangan (Contoh: Dari Alam Sutera)">
+                <input type="text" id="ketTf" placeholder="Asal/Tujuan (Contoh: Dari Cabang A)">
                 <button onclick="simpan('tf')" style="background: #3b82f6;">PROSES TRANSFER</button>
             </div>
 
@@ -107,7 +107,7 @@
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
-                        <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th><th>Aksi</th></tr>
+                        <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa Akhir</th><th>Aksi</th></tr>
                     </thead>
                     <tbody id="tabelBody"></tbody>
                 </table>
@@ -149,7 +149,7 @@
         if(logs) {
             Object.keys(logs).reverse().forEach(k => {
                 const l = logs[k];
-                let color = l.tipe === 'waste' ? 'red' : (l.tipe === 'tfin' ? 'blue' : (l.tipe === 'tfout' ? 'orange' : '#764ba2'));
+                let color = l.tipe === 'waste' ? '#ef4444' : (l.tipe === 'tfin' ? '#3b82f6' : (l.tipe === 'tfout' ? '#f59e0b' : '#764ba2'));
                 list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:12px; border-left: 4px solid ${color}; margin-bottom: 4px;">
                     <b style="color:${color}">${l.tipe.toUpperCase()}</b>: ${l.item} (${l.qty} ${l.satuan})<br>
                     <small>${l.staff || 'Sistem'} | ${l.jam} ${l.ket ? `| ${l.ket}` : ''}</small>
@@ -161,7 +161,8 @@
     function renderTabel() {
         const b = document.getElementById('tabelBody'); b.innerHTML = '';
         currentDB.forEach(i => {
-            const akhir = (i.awal || 0) - (i.ambil || 0) + (i.sisa || 0);
+            if(!i) return;
+            const akhir = (i.awal || 0) - (i.ambil || 0);
             b.innerHTML += `<tr data-nama="${i.nama.toLowerCase()}">
                 <td style="text-align:left">${i.nama}</td>
                 <td><input type="number" style="width:50px; text-align:center;" value="${i.awal}" onchange="upd(${i.id},'awal',this.value)"></td>
@@ -176,6 +177,7 @@
         ['Ambil', 'Waste', 'Tf'].forEach(s => {
             const sel = document.getElementById('pilih'+s); sel.innerHTML = '';
             currentDB.forEach(i => {
+                if(!i) return;
                 const opt = document.createElement('option'); opt.text = i.nama;
                 opt.onclick = () => { document.getElementById('search'+s).value = i.nama; sel.style.display='none'; sel.dataset.id = i.id; };
                 sel.appendChild(opt);
@@ -188,7 +190,7 @@
         
         if(tipe === 'tf') {
             finalTipe = document.getElementById('tipeTf').value;
-            staff = "SISTEM TF";
+            staff = "MUTASI TF";
             id = document.getElementById('pilihTf').dataset.id;
             qty = parseInt(document.getElementById('qtyTf').value);
             sat = document.getElementById('satuanTf').value;
@@ -201,14 +203,17 @@
             sat = document.getElementById('satuan'+s).value;
         }
 
-        if(!id || isNaN(qty)) return alert("Isi data barang & jumlah!");
+        if(!id || isNaN(qty)) return alert("Pilih barang & isi jumlah!");
 
-        // LOGIKA UPDATE STOK
+        // LOGIKA UPDATE STOK AWAL (SUPAYA SISA BERUBAH)
         if(finalTipe === 'ambil') {
             await dbRef.child(id).update({ ambil: (currentDB[id].ambil || 0) + qty });
         } else if(finalTipe === 'tfin') {
             await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) + qty });
         } else if(finalTipe === 'tfout') {
+            await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) - qty });
+        } else if(finalTipe === 'waste') {
+            // Waste biasanya mengurangi stok awal juga
             await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) - qty });
         }
 
@@ -237,7 +242,7 @@
         const tgl = new Date().toLocaleDateString('en-CA');
         logRef.orderByChild('tanggal').equalTo(tgl).once('value', snap => {
             const logs = snap.val(); if(!logs) return alert("Belum ada data.");
-            let h = `<table border="1" style="width:100%; border-collapse:collapse;"><tr><th>Barang</th><th>Ambil</th><th>Waste</th><th>TF IN</th><th>TF OUT</th></tr>`;
+            let h = `<table border="1" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;"><tr><th>Barang</th><th>Ambil</th><th>Waste</th><th>TF IN</th><th>TF OUT</th></tr>`;
             let r = {};
             Object.values(logs).forEach(l => {
                 if(!r[l.item]) r[l.item] = {a:0, w:0, ti:0, to:0};
@@ -246,5 +251,12 @@
                 else if(l.tipe==='tfin') r[l.item].ti += l.qty;
                 else if(l.tipe==='tfout') r[l.item].to += l.qty;
             });
-            for(let it in r) h += `<tr><td>${it}</td><td>${r[it].a}</td><td>${r[it].w}</td><td>${r[it].ti}</td><td>${r[it].to}</td></tr>`;
-            document.getElementById('
+            for(let it in r) h += `<tr><td style="text-align:left">${it}</td><td>${r[it].a}</td><td>${r[it].w}</td><td>${r[it].ti}</td><td>${r[it].to}</td></tr>`;
+            document.getElementById('rekapTableArea').innerHTML = h + `</table>`;
+            document.getElementById('modalRekap').style.display='block';
+        });
+    }
+    function tutupModal() { document.getElementById('modalRekap').style.display='none'; }
+</script>
+</body>
+</html>
