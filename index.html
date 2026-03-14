@@ -6,55 +6,69 @@
     <title>SISTOK CIPINANG PRO ✨</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        body { margin: 0; padding: 15px; font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; }
-        .container { max-width: 1300px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 1000px) { .grid { grid-template-columns: 400px 1fr; } }
-        .card { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+        body { margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; background: #f1f5f9; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 15px; border-radius: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 900px) { .grid { grid-template-columns: 450px 1fr; } }
+        .card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         .qty-group { display: flex; gap: 10px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; margin-top: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 10px; font-size: 11px; color: #64748b; text-transform: uppercase; }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-        .dropdown-pilih { position: absolute; z-index: 100; max-height: 200px; width: 100%; background: white; border: 1px solid #ccc; display: none; overflow-y: auto; }
-        .log-container { max-height: 400px; overflow-y: auto; background: #fdfdfd; padding: 10px; border-radius: 10px; }
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 600px; border-radius: 15px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
+        
+        /* STYLE BARU UNTUK SEARCH LIST */
+        .search-results { 
+            max-height: 200px; 
+            overflow-y: auto; 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            display: none; 
+            margin-bottom: 10px;
+        }
+        .search-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        .btn-pilih { 
+            background: #10b981; 
+            width: auto; 
+            padding: 5px 15px; 
+            font-size: 12px; 
+        }
+        .selected-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: none;
+            font-weight: bold;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f8fafc; padding: 10px; color: #64748b; }
+        td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; }
     </style>
 </head>
 <body>
 
-<div id="modalRekap" class="modal">
-    <div class="modal-content">
-        <h3>📊 Rekap Harian (Ambil, Waste, TF)</h3>
-        <div id="rekapTableArea"></div>
-        <button onclick="salinRekapTeks()" style="background:#10b981; margin-top:10px;">📋 SALIN TEKS WA</button>
-        <button onclick="tutupModal()" style="background:#64748b; margin-top:5px;">TUTUP</button>
-    </div>
-</div>
-
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; color:#1e293b;">SISTOK CIPINANG PRO ✨</h2>
-        <div>
-            <button style="background: #f59e0b; width:auto; padding:8px 15px;" onclick="bukaRekap()">📊 REKAP</button>
-            <button style="background: #1e293b; width:auto; padding:8px 15px;" onclick="cetakExcel()">📥 EXCEL</button>
-        </div>
-    </div>
+    <h2 style="text-align:center; color:#1e293b;">SISTOK CIPINANG PRO ✨</h2>
 
     <div class="grid">
-        <div class="card-area">
-            <div class="card" style="border-top: 5px solid #764ba2;">
-                <h4 style="margin:0 0 10px 0; color:#764ba2;">📦 Ambil Barang</h4>
+        <div>
+            <div class="card" style="border-left: 6px solid #764ba2;">
+                <h4 style="margin-top:0; color:#764ba2;">📦 Ambil Barang</h4>
                 <input type="text" id="staffAmbil" placeholder="Nama Staff">
-                <div style="position: relative;">
-                    <input type="text" id="searchAmbil" placeholder="🔍 Cari Barang..." onkeyup="filterDropdown('Ambil')" onfocus="showDropdown('Ambil')">
-                    <select id="pilihAmbil" class="dropdown-pilih" size="5"></select>
-                </div>
+                <input type="text" id="searchAmbil" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Ambil')">
+                <div id="resAmbil" class="search-results"></div>
+                <div id="badgeAmbil" class="selected-badge"></div>
+                
                 <div class="qty-group">
                     <input type="number" id="qtyAmbil" placeholder="Qty">
                     <select id="satuanAmbil"></select>
@@ -62,52 +76,45 @@
                 <button onclick="simpan('ambil')" style="background: var(--grad);">SIMPAN AMBIL</button>
             </div>
 
-            <div class="card" style="border-top: 5px solid #3b82f6; background: #f0f7ff;">
-                <h4 style="margin:0 0 10px 0; color:#3b82f6;">🔄 Mutasi / Transfer</h4>
+            <div class="card" style="border-left: 6px solid #3b82f6; background: #f0f7ff;">
+                <h4 style="margin-top:0; color:#3b82f6;">🔄 Transfer (TF IN / OUT)</h4>
                 <select id="tipeTf">
-                    <option value="tfin">TF IN (Masuk dari Cabang/Pusat)</option>
-                    <option value="tfout">TF OUT (Kirim ke Cabang Lain)</option>
+                    <option value="tfin">TF IN (Masuk)</option>
+                    <option value="tfout">TF OUT (Keluar)</option>
                 </select>
-                <div style="position: relative;">
-                    <input type="text" id="searchTf" placeholder="🔍 Cari Barang..." onkeyup="filterDropdown('Tf')" onfocus="showDropdown('Tf')">
-                    <select id="pilihTf" class="dropdown-pilih" size="5"></select>
-                </div>
+                <input type="text" id="searchTf" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Tf')">
+                <div id="resTf" class="search-results"></div>
+                <div id="badgeTf" class="selected-badge"></div>
+
                 <div class="qty-group">
                     <input type="number" id="qtyTf" placeholder="Qty">
                     <select id="satuanTf"></select>
                 </div>
-                <input type="text" id="ketTf" placeholder="Asal/Tujuan (Contoh: Dari Cabang A)">
+                <input type="text" id="ketTf" placeholder="Keterangan (Contoh: Dari Alam Sutera)">
                 <button onclick="simpan('tf')" style="background: #3b82f6;">PROSES TRANSFER</button>
             </div>
 
-            <div class="card" style="border-top: 5px solid #ef4444; background: #fffafb;">
-                <h4 style="margin:0 0 10px 0; color:#ef4444;">⚠️ Laporan Waste (Rusak)</h4>
+            <div class="card" style="border-left: 6px solid #ef4444;">
+                <h4 style="margin-top:0; color:#ef4444;">⚠️ Laporan Waste</h4>
                 <input type="text" id="staffWaste" placeholder="Nama Staff">
-                <div style="position: relative;">
-                    <input type="text" id="searchWaste" placeholder="🔍 Cari Barang..." onkeyup="filterDropdown('Waste')" onfocus="showDropdown('Waste')">
-                    <select id="pilihWaste" class="dropdown-pilih" size="5"></select>
-                </div>
+                <input type="text" id="searchWaste" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Waste')">
+                <div id="resWaste" class="search-results"></div>
+                <div id="badgeWaste" class="selected-badge"></div>
+
                 <div class="qty-group">
                     <input type="number" id="qtyWaste" placeholder="Qty">
                     <select id="satuanWaste"></select>
                 </div>
-                <textarea id="alasanWaste" placeholder="Alasan kerusakan..."></textarea>
-                <button onclick="simpan('waste')" style="background:#ef4444;">KIRIM WASTE</button>
-            </div>
-
-            <div class="card">
-                <h4>Riwayat Terakhir</h4>
-                <div class="log-container" id="logList"></div>
+                <button onclick="simpan('waste')" style="background: #ef4444;">KIRIM WASTE</button>
             </div>
         </div>
 
         <div class="card">
             <h4>Monitoring Stok</h4>
-            <input type="text" id="searchTabel" placeholder="🔍 Cari di tabel..." onkeyup="filterTabel()">
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
-                        <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa Akhir</th><th>Aksi</th></tr>
+                        <tr><th>Nama Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th></tr>
                     </thead>
                     <tbody id="tabelBody"></tbody>
                 </table>
@@ -128,135 +135,91 @@
     const dbRef = firebase.database().ref('stok_barang');
     const logRef = firebase.database().ref('riwayat_aktivitas');
 
-    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BOX", "L", "BOTOL"];
     let currentDB = [];
-    let currentRekap = "";
-
+    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BOX", "L", "BOTOL"];
     const uomHtml = uom.map(u => `<option value="${u}">${u}</option>`).join('');
-    ['Ambil', 'Waste', 'Tf'].forEach(id => document.getElementById('satuan'+id).innerHTML = uomHtml);
+    ['Ambil', 'Tf', 'Waste'].forEach(id => document.getElementById('satuan'+id).innerHTML = uomHtml);
 
     dbRef.on('value', snap => {
         const val = snap.val();
         if(val) {
             currentDB = Array.isArray(val) ? val : Object.values(val);
-            renderTabel(); renderDropdowns();
+            renderTabel();
         }
     });
 
-    logRef.limitToLast(15).on('value', snap => {
-        const logs = snap.val();
-        const list = document.getElementById('logList'); list.innerHTML = '';
-        if(logs) {
-            Object.keys(logs).reverse().forEach(k => {
-                const l = logs[k];
-                let color = l.tipe === 'waste' ? '#ef4444' : (l.tipe === 'tfin' ? '#3b82f6' : (l.tipe === 'tfout' ? '#f59e0b' : '#764ba2'));
-                list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:12px; border-left: 4px solid ${color}; margin-bottom: 4px;">
-                    <b style="color:${color}">${l.tipe.toUpperCase()}</b>: ${l.item} (${l.qty} ${l.satuan})<br>
-                    <small>${l.staff || 'Sistem'} | ${l.jam} ${l.ket ? `| ${l.ket}` : ''}</small>
-                </div>`;
+    function cariBarang(suffix) {
+        const input = document.getElementById('search'+suffix).value.toLowerCase();
+        const resDiv = document.getElementById('res'+suffix);
+        resDiv.innerHTML = '';
+        
+        if(input.length < 1) { resDiv.style.display = 'none'; return; }
+        
+        const filtered = currentDB.filter(i => i && i.nama.toLowerCase().includes(input));
+        if(filtered.length > 0) {
+            resDiv.style.display = 'block';
+            filtered.forEach(item => {
+                resDiv.innerHTML += `
+                    <div class="search-item">
+                        <span>${item.nama}</span>
+                        <button class="btn-pilih" onclick="pilihBarang('${suffix}', ${item.id}, '${item.nama}')">PILIH</button>
+                    </div>`;
             });
+        } else {
+            resDiv.innerHTML = '<div style="padding:10px">Barang tidak ditemukan</div>';
         }
-    });
+    }
+
+    function pilihBarang(suffix, id, nama) {
+        const badge = document.getElementById('badge'+suffix);
+        badge.innerHTML = "Terpilih: " + nama;
+        badge.style.display = 'block';
+        badge.dataset.id = id;
+        document.getElementById('res'+suffix).style.display = 'none';
+        document.getElementById('search'+suffix).value = ''; 
+    }
 
     function renderTabel() {
         const b = document.getElementById('tabelBody'); b.innerHTML = '';
         currentDB.forEach(i => {
             if(!i) return;
-            const akhir = (i.awal || 0) - (i.ambil || 0);
-            b.innerHTML += `<tr data-nama="${i.nama.toLowerCase()}">
+            const sisa = (i.awal || 0) - (i.ambil || 0);
+            b.innerHTML += `<tr>
                 <td style="text-align:left">${i.nama}</td>
-                <td><input type="number" style="width:50px; text-align:center;" value="${i.awal}" onchange="upd(${i.id},'awal',this.value)"></td>
+                <td>${i.awal}</td>
                 <td style="color:red">-${i.ambil||0}</td>
-                <td style="font-weight:bold">${akhir}</td>
-                <td><button onclick="tambah(${i.id})" style="background:#10b981; width:auto; padding:2px 8px;">+</button></td>
+                <td style="font-weight:bold">${sisa}</td>
             </tr>`;
         });
     }
 
-    function renderDropdowns() {
-        ['Ambil', 'Waste', 'Tf'].forEach(s => {
-            const sel = document.getElementById('pilih'+s); sel.innerHTML = '';
-            currentDB.forEach(i => {
-                if(!i) return;
-                const opt = document.createElement('option'); opt.text = i.nama;
-                opt.onclick = () => { document.getElementById('search'+s).value = i.nama; sel.style.display='none'; sel.dataset.id = i.id; };
-                sel.appendChild(opt);
-            });
-        });
-    }
-
     async function simpan(tipe) {
-        let staff, id, qty, sat, ket = "", finalTipe = tipe;
-        
-        if(tipe === 'tf') {
-            finalTipe = document.getElementById('tipeTf').value;
-            staff = "MUTASI TF";
-            id = document.getElementById('pilihTf').dataset.id;
-            qty = parseInt(document.getElementById('qtyTf').value);
-            sat = document.getElementById('satuanTf').value;
-            ket = document.getElementById('ketTf').value;
-        } else {
-            const s = tipe === 'ambil' ? 'Ambil' : 'Waste';
-            staff = document.getElementById('staff'+s).value;
-            id = document.getElementById('pilih'+s).dataset.id;
-            qty = parseInt(document.getElementById('qty'+s).value);
-            sat = document.getElementById('satuan'+s).value;
-        }
+        let suffix = tipe === 'tf' ? 'Tf' : (tipe === 'ambil' ? 'Ambil' : 'Waste');
+        let id = document.getElementById('badge'+suffix).dataset.id;
+        let qty = parseInt(document.getElementById('qty'+suffix).value);
+        let sat = document.getElementById('satuan'+suffix).value;
+        let staff = document.getElementById('staff'+suffix)?.value || "SISTEM";
+        let finalTipe = (tipe === 'tf') ? document.getElementById('tipeTf').value : tipe;
 
-        if(!id || isNaN(qty)) return alert("Pilih barang & isi jumlah!");
+        if(!id || isNaN(qty)) return alert("Silakan PILIH barang dulu dan isi jumlah!");
 
-        // LOGIKA UPDATE STOK AWAL (SUPAYA SISA BERUBAH)
+        // Update Logika Firebase
         if(finalTipe === 'ambil') {
             await dbRef.child(id).update({ ambil: (currentDB[id].ambil || 0) + qty });
         } else if(finalTipe === 'tfin') {
             await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) + qty });
-        } else if(finalTipe === 'tfout') {
-            await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) - qty });
-        } else if(finalTipe === 'waste') {
-            // Waste biasanya mengurangi stok awal juga
+        } else if(finalTipe === 'tfout' || finalTipe === 'waste') {
             await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) - qty });
         }
 
         await logRef.push({
-            staff, item: currentDB[id].nama, itemId: id, qty, satuan: sat, tipe: finalTipe, ket,
+            staff, item: currentDB[id].nama, qty, satuan: sat, tipe: finalTipe,
             jam: new Date().toLocaleTimeString('id-ID'), tanggal: new Date().toLocaleDateString('en-CA')
         });
 
-        alert("Update Stok Berhasil!"); location.reload();
+        alert("Berhasil disimpan!");
+        location.reload();
     }
-
-    function filterDropdown(s) {
-        const val = document.getElementById('search'+s).value.toLowerCase();
-        const sel = document.getElementById('pilih'+s); sel.style.display = val ? 'block' : 'none';
-        for(let o of sel.options) o.style.display = o.text.toLowerCase().includes(val) ? '' : 'none';
-    }
-    function showDropdown(s) { if(document.getElementById('search'+s).value) document.getElementById('pilih'+s).style.display='block'; }
-    function filterTabel() {
-        const val = document.getElementById('searchTabel').value.toLowerCase();
-        document.querySelectorAll("#tabelBody tr").forEach(r => r.style.display = r.dataset.nama.includes(val) ? '' : 'none');
-    }
-    function upd(id, c, v) { dbRef.child(id).update({ [c]: parseInt(v) || 0 }); }
-    function tambah(id) { let n = parseInt(prompt("Tambah Stok Awal?")); if(n) upd(id, 'awal', (currentDB[id].awal || 0) + n); }
-    
-    function bukaRekap() {
-        const tgl = new Date().toLocaleDateString('en-CA');
-        logRef.orderByChild('tanggal').equalTo(tgl).once('value', snap => {
-            const logs = snap.val(); if(!logs) return alert("Belum ada data.");
-            let h = `<table border="1" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;"><tr><th>Barang</th><th>Ambil</th><th>Waste</th><th>TF IN</th><th>TF OUT</th></tr>`;
-            let r = {};
-            Object.values(logs).forEach(l => {
-                if(!r[l.item]) r[l.item] = {a:0, w:0, ti:0, to:0};
-                if(l.tipe==='ambil') r[l.item].a += l.qty;
-                else if(l.tipe==='waste') r[l.item].w += l.qty;
-                else if(l.tipe==='tfin') r[l.item].ti += l.qty;
-                else if(l.tipe==='tfout') r[l.item].to += l.qty;
-            });
-            for(let it in r) h += `<tr><td style="text-align:left">${it}</td><td>${r[it].a}</td><td>${r[it].w}</td><td>${r[it].ti}</td><td>${r[it].to}</td></tr>`;
-            document.getElementById('rekapTableArea').innerHTML = h + `</table>`;
-            document.getElementById('modalRekap').style.display='block';
-        });
-    }
-    function tutupModal() { document.getElementById('modalRekap').style.display='none'; }
 </script>
 </body>
 </html>
