@@ -3,66 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTOK CIPINANG ✨</title>
-    
+    <title>SISTOK CIPINANG ONLINE ✨</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid #007bff; }
-        h2, h3 { color: #333; margin-top: 0; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; color: white; }
-        .btn-ambil { background: #007bff; }
-        .btn-waste { background: #dc3545; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; margin-top: 10px; font-size: 14px; }
-        th { background: #007bff; color: white; padding: 12px; }
-        td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
-        #status { display: none; text-align: center; font-weight: bold; color: #007bff; padding: 10px; }
-        .log-list { max-height: 200px; overflow-y: auto; font-size: 13px; color: #666; }
+        :root { --grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        body { margin: 0; padding: 15px; font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 900px) { .grid { grid-template-columns: 380px 1fr; } }
+        .card { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 10px; font-size: 12px; color: #64748b; }
+        td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .dropdown-pilih { position: absolute; z-index: 100; max-height: 200px; width: 100%; background: white; border: 1px solid #ccc; display: none; overflow-y: auto; }
+        #loadingTxt { color: #2563eb; font-weight: bold; text-align: center; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="card">
-        <h2>SISTOK CIPINANG ✨</h2>
-        <input type="text" id="staff" placeholder="Nama Staff">
-        <select id="pilihItem"></select>
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="qty" placeholder="Qty">
-            <select id="satuan" style="flex:1;">
-                <option>PACK</option><option>KG</option><option>PCS</option><option>BOX</option><option>BOTOL</option>
-            </select>
-        </div>
-        <button class="btn-ambil" onclick="simpan('ambil')">📦 SIMPAN PENGAMBILAN</button>
-        
-        <hr style="margin:20px 0; border: 0; border-top: 1px solid #eee;">
-        
-        <h3 style="color:#dc3545;">⚠️ Laporan Waste (Rusak)</h3>
-        <textarea id="alasan" placeholder="Alasan rusak..."></textarea>
-        <input type="file" id="fotoFile" accept="image/*">
-        <div id="status">⏳ Memproses... Mohon jangan tutup browser.</div>
-        <button class="btn-waste" onclick="simpan('waste')">🔥 KIRIM LAPORAN WASTE</button>
-    </div>
+    <h2 style="text-align:center; color:#1e293b; margin-top:0;">SISTOK CIPINANG ✨</h2>
+    
+    <div class="grid">
+        <div>
+            <div class="card" style="border-left: 5px solid #764ba2;">
+                <h4 style="margin:0 0 10px 0; color:#764ba2;">📦 Pengambilan</h4>
+                <input type="text" id="staffAmbil" placeholder="Nama Staff">
+                <div style="position: relative;">
+                    <input type="text" id="searchAmbil" placeholder="Cari Barang..." onkeyup="filterDropdown('Ambil')" onfocus="showDropdown('Ambil')">
+                    <select id="pilihAmbil" class="dropdown-pilih" size="5"></select>
+                </div>
+                <div style="display:flex; gap:10px">
+                    <input type="number" id="qtyAmbil" placeholder="Qty">
+                    <select id="satuanAmbil"><option>PACK</option><option>KG</option><option>PCS</option><option>BOX</option><option>BOTOL</option></select>
+                </div>
+                <button onclick="simpan('ambil')" style="background: var(--grad);">SIMPAN</button>
+            </div>
 
-    <div class="card" style="border-top-color: #28a745;">
-        <h3>📊 Monitoring Stok</h3>
-        <div style="overflow-x:auto;">
-            <table>
-                <thead>
-                    <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th></tr>
-                </thead>
-                <tbody id="tabelBody"></tbody>
-            </table>
+            <div class="card" style="border-left: 5px solid #ef4444; background: #fffafb;">
+                <h4 style="margin:0 0 10px 0; color:#ef4444;">⚠️ Laporan Waste</h4>
+                <input type="text" id="staffWaste" placeholder="Nama Staff">
+                <div style="position: relative;">
+                    <input type="text" id="searchWaste" placeholder="Cari Barang..." onkeyup="filterDropdown('Waste')" onfocus="showDropdown('Waste')">
+                    <select id="pilihWaste" class="dropdown-pilih" size="5"></select>
+                </div>
+                <textarea id="alasanWaste" placeholder="Alasan kerusakan..."></textarea>
+                <input type="file" id="fileWaste" accept="image/*">
+                <p id="loadingTxt">⏳ Mengunggah foto... Mohon tunggu.</p>
+                <button onclick="simpan('waste')" style="background:#ef4444;">KIRIM WASTE</button>
+            </div>
         </div>
-    </div>
 
-    <div class="card" style="border-top-color: #6c757d;">
-        <h3>Riwayat Terakhir</h3>
-        <div id="logList" class="log-list"></div>
+        <div class="card">
+            <h4>Monitoring Stok</h4>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>AKHIR</th></tr></thead>
+                    <tbody id="tabelBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -75,91 +80,73 @@
         appId: "1:205496083485:web:b5bb29bb675d414befd2f4"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const dbRef = firebase.database().ref('stok_barang');
+    const logRef = firebase.database().ref('riwayat_aktivitas');
 
-    let masterData = [];
+    let dataBarang = [];
 
-    // Tampilkan Data & Dropdown
-    db.ref('stok_barang').on('value', snap => {
-        const data = snap.val();
-        if(!data) return;
-        masterData = Array.isArray(data) ? data : Object.values(data);
-        
-        let tableHtml = '';
-        let selectHtml = '';
-        masterData.forEach(item => {
-            if(!item) return;
-            const sisa = (item.awal || 0) - (item.ambil || 0);
-            tableHtml += `<tr><td>${item.nama}</td><td>${item.awal}</td><td style="color:red">-${item.ambil||0}</td><td><b>${sisa}</b></td></tr>`;
-            selectHtml += `<option value="${item.id}">${item.nama}</option>`;
+    dbRef.on('value', snap => {
+        dataBarang = Object.values(snap.val() || {});
+        renderTabel(); renderDropdown();
+    });
+
+    function renderTabel() {
+        const b = document.getElementById('tabelBody'); b.innerHTML = '';
+        dataBarang.forEach(i => {
+            const akhir = (i.awal || 0) - (i.ambil || 0);
+            b.innerHTML += `<tr><td style="text-align:left">${i.nama}</td><td>${i.awal}</td><td style="color:red">-${i.ambil||0}</td><td style="font-weight:bold">${akhir}</td></tr>`;
         });
-        document.getElementById('tabelBody').innerHTML = tableHtml;
-        document.getElementById('pilihItem').innerHTML = selectHtml;
-    });
+    }
 
-    // Tampilkan Riwayat
-    db.ref('riwayat_aktivitas').limitToLast(5).on('value', snap => {
-        const logs = snap.val();
-        const div = document.getElementById('logList');
-        div.innerHTML = '';
-        if(logs) {
-            Object.values(logs).reverse().forEach(l => {
-                div.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid #eee;">
-                    ${l.jam} - <b>${l.staff}</b> ${l.tipe} ${l.item} (${l.qty})
-                    ${l.foto ? `<br><a href="${l.foto}" target="_blank" style="color:blue">Lihat Foto</a>` : ''}
-                </div>`;
+    function renderDropdown() {
+        ['Ambil', 'Waste'].forEach(s => {
+            const sel = document.getElementById('pilih' + s); sel.innerHTML = '';
+            dataBarang.forEach(i => {
+                const opt = document.createElement('option'); opt.text = i.nama;
+                opt.onclick = () => { document.getElementById('search'+s).value=i.nama; sel.style.display='none'; sel.dataset.id=i.id; };
+                sel.appendChild(opt);
             });
-        }
-    });
+        });
+    }
 
     async function simpan(tipe) {
-        const staff = document.getElementById('staff').value;
-        const id = document.getElementById('pilihItem').value;
-        const qty = parseInt(document.getElementById('qty').value);
-        const sat = document.getElementById('satuan').value;
-        const file = document.getElementById('fotoFile').files[0];
+        const s = tipe === 'ambil' ? 'Ambil' : 'Waste';
+        const staff = document.getElementById('staff' + s).value;
+        const id = document.getElementById('pilih' + s).dataset.id;
+        const fileInput = document.getElementById('fileWaste');
+        
+        if(!staff || !id) return alert("Isi data dulu!");
 
-        if(!staff || isNaN(qty)) return alert("Isi Nama Staff & Jumlah!");
-
-        document.getElementById('status').style.display = 'block';
-        let secureFotoUrl = "";
-
-        // PROSES UPLOAD CLOUDINARY
-        if(tipe === 'waste' && file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', 'ml_default'); // Preset publik Cloudinary demo
-
+        let fotoUrl = "";
+        if(tipe === 'waste' && fileInput.files[0]) {
+            document.getElementById('loadingTxt').style.display = 'block';
+            const fd = new FormData();
+            fd.append('file', fileInput.files[0]);
+            fd.append('upload_preset', 'ml_default');
             try {
-                const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', { method: 'POST', body: fd });
                 const resData = await res.json();
-                secureFotoUrl = resData.secure_url; // Link Cloudinary otomatis HTTPS (Gembok Hijau)
-            } catch(e) {
-                console.error(e);
-                alert("Upload foto gagal, tapi data stok tetap akan disimpan.");
-            }
+                fotoUrl = resData.secure_url;
+            } catch(e) { alert("Gagal upload foto"); }
+            document.getElementById('loadingTxt').style.display = 'none';
         }
 
-        // UPDATE STOK FIREBASE
         if(tipe === 'ambil') {
-            db.ref('stok_barang/' + id + '/ambil').transaction(curr => (curr || 0) + qty);
+            const current = dataBarang.find(x => x.id == id).ambil || 0;
+            await dbRef.child(id).update({ ambil: current + 1 });
         }
 
-        // SIMPAN RIWAYAT
-        await db.ref('riwayat_aktivitas').push({
-            staff, tipe, qty, satuan: sat, item: masterData[id].nama, 
-            foto: secureFotoUrl, jam: new Date().toLocaleTimeString('id-ID'),
-            tanggal: new Date().toLocaleDateString('en-CA')
-        });
-
-        document.getElementById('status').style.display = 'none';
-        alert("Berhasil!");
-        document.getElementById('qty').value = '';
-        document.getElementById('fotoFile').value = '';
+        await logRef.push({ staff, tipe, foto: fotoUrl, jam: new Date().toLocaleTimeString() });
+        alert("Berhasil!"); location.reload();
     }
+
+    function filterDropdown(s) {
+        const v = document.getElementById('search'+s).value.toLowerCase();
+        const sel = document.getElementById('pilih'+s);
+        sel.style.display = v ? 'block' : 'none';
+        for(let o of sel.options) o.style.display = o.text.toLowerCase().includes(v) ? '' : 'none';
+    }
+    function showDropdown(s) { if(document.getElementById('search'+s).value) document.getElementById('pilih'+s).style.display='block'; }
 </script>
 </body>
 </html>
