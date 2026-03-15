@@ -3,127 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTOK CIPINANG PRO ✨</title>
+    <title>SISTOK CIPINANG FRESH ✨</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        body { margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; background: #f1f5f9; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 15px; border-radius: 15px; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 900px) { .grid { grid-template-columns: 450px 1fr; } }
-        .card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-        .qty-group { display: flex; gap: 10px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
+        :root { --purple: #a855f7; --blue: #3b82f6; --red: #ef4444; --green: #22c55e; --yellow: #eab308; }
+        body { margin: 0; padding: 10px; font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; }
+        .container { max-width: 1400px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .grid-input { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 14px; }
+        button { cursor: pointer; border: none; font-weight: bold; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+        .main-btn { width: 100%; padding: 12px; border-radius: 8px; color: white; margin-top: 10px; }
+        .search-res { position: absolute; background: #1e293b; width: calc(100% - 30px); max-height: 200px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--blue); z-index: 1000; display: none; }
+        .search-item { padding: 12px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .selected-box { background: rgba(34, 197, 94, 0.2); color: var(--green); padding: 10px; border-radius: 8px; margin: 10px 0; display: none; border: 1px solid var(--green); font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { padding: 12px; background: rgba(255,255,255,0.1); color: var(--green); font-size: 11px; }
+        td { padding: 12px; text-align: center; border-bottom: 1px solid #1e293b; font-size: 13px; }
+        .log-item { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--purple); position: relative; }
+        .btn-del { position: absolute; right: 10px; top: 15px; background: var(--red); color: white; padding: 5px 10px; border-radius: 5px; font-size: 11px; }
         
-        /* STYLE BARU UNTUK SEARCH LIST */
-        .search-results { 
-            max-height: 200px; 
-            overflow-y: auto; 
-            background: #f8fafc; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 8px; 
-            display: none; 
-            margin-bottom: 10px;
+        /* Modals */
+        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #1e293b; margin: 10% auto; padding: 25px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid var(--blue); }
+        
+        /* Login Layer */
+        #loginOverlay { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: #1e293b; padding: 40px; border-radius: 25px; border: 1px solid var(--purple); width: 85%; max-width: 350px; text-align: center; }
+
+        /* Print Style */
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 58mm; color: black !important; background: white !important; }
         }
-        .search-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px; 
-            border-bottom: 1px solid #e2e8f0; 
-        }
-        .btn-pilih { 
-            background: #10b981; 
-            width: auto; 
-            padding: 5px 15px; 
-            font-size: 12px; 
-        }
-        .selected-badge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 5px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-bottom: 10px;
-            display: none;
-            font-weight: bold;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: #f8fafc; padding: 10px; color: #64748b; }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+        #printArea { display: none; }
     </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2 style="color:var(--purple); margin-bottom:5px;">SISTOK LOGIN</h2>
+        <p style="opacity:0.6; font-size:12px; margin-bottom:20px;">Masukkan nama untuk memproses stok</p>
+        <input type="text" id="userInput" placeholder="Nama Anda..." autocomplete="off">
+        <button class="main-btn" style="background:var(--purple);" onclick="prosesLogin()">MASUK</button>
+    </div>
+</div>
+
+<div id="modalRekap" class="modal">
+    <div class="modal-content">
+        <h3 style="margin:0; color:var(--blue);">📊 Rekap Aktivitas</h3>
+        <input type="date" id="filterTgl">
+        <div style="display:flex; gap:10px;">
+            <button onclick="prosesRekap()" style="background:var(--blue); color:white; flex:1; padding:12px; border-radius:8px;">CARI</button>
+            <button onclick="exportExcel()" style="background:var(--green); color:white; flex:1; padding:12px; border-radius:8px;">EXCEL</button>
+        </div>
+        <div id="rekapArea" style="max-height:300px; overflow-y:auto; margin:15px 0;"></div>
+        <button onclick="tutupModal()" style="background:var(--red); color:white; width:100%; padding:12px; border-radius:8px;">TUTUP</button>
+    </div>
+</div>
+
 <div class="container">
-    <h2 style="text-align:center; color:#1e293b;">SISTOK CIPINANG PRO ✨</h2>
-
-    <div class="grid">
+    <div class="header">
         <div>
-            <div class="card" style="border-left: 6px solid #764ba2;">
-                <h4 style="margin-top:0; color:#764ba2;">📦 Ambil Barang</h4>
-                <input type="text" id="staffAmbil" placeholder="Nama Staff">
-                <input type="text" id="searchAmbil" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Ambil')">
-                <div id="resAmbil" class="search-results"></div>
-                <div id="badgeAmbil" class="selected-badge"></div>
-                
-                <div class="qty-group">
-                    <input type="number" id="qtyAmbil" placeholder="Qty">
-                    <select id="satuanAmbil"></select>
-                </div>
-                <button onclick="simpan('ambil')" style="background: var(--grad);">SIMPAN AMBIL</button>
-            </div>
+            <h1 style="margin:0; font-size: 1.5rem; color: var(--purple);">SISTOK CIPINANG ✨</h1>
+            <p id="staffDisplay" style="margin:0; color:var(--green); font-size: 12px; font-weight:bold;">Staff: -</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button onclick="resetHarian()" style="background:var(--red); padding:8px 12px; border-radius:8px; color:white; font-size:12px;">🧹 RESET</button>
+            <button onclick="bukaModal()" style="background:var(--yellow); padding:8px 12px; border-radius:8px; color:white; font-size:12px;">📊 REKAP</button>
+        </div>
+    </div>
 
-            <div class="card" style="border-left: 6px solid #3b82f6; background: #f0f7ff;">
-                <h4 style="margin-top:0; color:#3b82f6;">🔄 Transfer (TF IN / OUT)</h4>
-                <select id="tipeTf">
-                    <option value="tfin">TF IN (Masuk)</option>
-                    <option value="tfout">TF OUT (Keluar)</option>
-                </select>
-                <input type="text" id="searchTf" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Tf')">
-                <div id="resTf" class="search-results"></div>
-                <div id="badgeTf" class="selected-badge"></div>
-
-                <div class="qty-group">
-                    <input type="number" id="qtyTf" placeholder="Qty">
-                    <select id="satuanTf"></select>
-                </div>
-                <input type="text" id="ketTf" placeholder="Keterangan (Contoh: Dari Alam Sutera)">
-                <button onclick="simpan('tf')" style="background: #3b82f6;">PROSES TRANSFER</button>
-            </div>
-
-            <div class="card" style="border-left: 6px solid #ef4444;">
-                <h4 style="margin-top:0; color:#ef4444;">⚠️ Laporan Waste</h4>
-                <input type="text" id="staffWaste" placeholder="Nama Staff">
-                <input type="text" id="searchWaste" placeholder="🔍 Cari Nama Barang..." onkeyup="cariBarang('Waste')">
-                <div id="resWaste" class="search-results"></div>
-                <div id="badgeWaste" class="selected-badge"></div>
-
-                <div class="qty-group">
-                    <input type="number" id="qtyWaste" placeholder="Qty">
-                    <select id="satuanWaste"></select>
-                </div>
-                <button onclick="simpan('waste')" style="background: #ef4444;">KIRIM WASTE</button>
-            </div>
+    <div class="grid-input">
+        <div class="card">
+            <h4 style="margin:0; color:var(--purple);">📦 AMBIL</h4>
+            <input type="text" id="srcA" placeholder="Cari Barang..." oninput="cari('A')" autocomplete="off">
+            <div id="resA" class="search-res"></div>
+            <div id="bdgA" class="selected-box"></div>
+            <input type="number" id="qtyA" placeholder="Jumlah">
+            <select id="satA"></select>
+            <button class="main-btn" style="background: var(--purple);" onclick="simpan('ambil')">SIMPAN & CETAK</button>
         </div>
 
         <div class="card">
-            <h4>Monitoring Stok</h4>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr><th>Nama Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th></tr>
-                    </thead>
-                    <tbody id="tabelBody"></tbody>
-                </table>
-            </div>
+            <h4 style="margin:0; color:var(--blue);">🔄 TRANSFER</h4>
+            <select id="tfTipe"><option value="tfin">TF IN (Masuk)</option><option value="tfout">TF OUT (Keluar)</option></select>
+            <input type="text" id="srcT" placeholder="Cari Barang..." oninput="cari('T')" autocomplete="off">
+            <div id="resT" class="search-res"></div>
+            <div id="bdgT" class="selected-box"></div>
+            <input type="number" id="qtyT" placeholder="Jumlah">
+            <select id="satT"></select>
+            <button class="main-btn" style="background: var(--blue);" onclick="simpan('tf')">PROSES TF</button>
         </div>
+
+        <div class="card">
+            <h4 style="margin:0; color:var(--red);">⚠️ WASTE</h4>
+            <input type="text" id="srcW" placeholder="Cari Barang..." oninput="cari('W')" autocomplete="off">
+            <div id="resW" class="search-res"></div>
+            <div id="bdgW" class="selected-box"></div>
+            <input type="number" id="qtyW" placeholder="Jumlah">
+            <select id="satW"></select>
+            <button class="main-btn" style="background: var(--red);" onclick="simpan('waste')">KIRIM WASTE</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4 style="margin-top:0;">📊 MONITORING STOK</h4>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th><th>MURNI</th><th>TOTAL</th></tr>
+                </thead>
+                <tbody id="tabelBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h4>📑 AKTIVITAS HARI INI</h4>
+        <div id="logList"></div>
+    </div>
+</div>
+
+<div id="printArea">
+    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:5px;">
+        <strong>SISTOK CIPINANG ✨</strong><br>
+        <small id="pTgl"></small>
+    </div>
+    <div id="pIsi" style="padding:10px 0; font-size:12px;"></div>
+    <div style="font-size:10px; border-top:1px dashed #000; padding-top:5px;">
+        Staff: <span id="pStf"></span> | <span id="pJam"></span>
     </div>
 </div>
 
 <script>
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBViL4PQMHXts_UWPu2leYs1ugFAMG_S4w",
         authDomain: "sistok-cipinang-37ae6.firebaseapp.com",
@@ -132,93 +152,159 @@
         appId: "1:205496083485:web:b5bb29bb675d414befd2f4"
     };
     firebase.initializeApp(firebaseConfig);
-    const dbRef = firebase.database().ref('stok_barang');
-    const logRef = firebase.database().ref('riwayat_aktivitas');
+    const db = firebase.database();
 
-    let currentDB = [];
-    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BOX", "L", "BOTOL"];
-    const uomHtml = uom.map(u => `<option value="${u}">${u}</option>`).join('');
-    ['Ambil', 'Tf', 'Waste'].forEach(id => document.getElementById('satuan'+id).innerHTML = uomHtml);
+    let dbBarang = [];
+    let dbLog = [];
+    let userAktif = "";
+    const tglSkg = new Date().toLocaleDateString('en-CA');
+    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BALL", "JRG", "BOX", "KARTON", "L", "BOTOL"];
 
-    dbRef.on('value', snap => {
-        const val = snap.val();
-        if(val) {
-            currentDB = Array.isArray(val) ? val : Object.values(val);
-            renderTabel();
-        }
+    // Inisialisasi Dropdown Satuan
+    ['A', 'T', 'W'].forEach(s => {
+        document.getElementById('sat'+s).innerHTML = uom.map(u => `<option value="${u}">${u}</option>`).join('');
     });
 
-    function cariBarang(suffix) {
-        const input = document.getElementById('search'+suffix).value.toLowerCase();
-        const resDiv = document.getElementById('res'+suffix);
-        resDiv.innerHTML = '';
+    // FUNGSI LOGIN
+    function prosesLogin() {
+        const n = document.getElementById('userInput').value.trim();
+        if (n.length < 2) return alert("Masukkan nama minimal 2 huruf!");
         
-        if(input.length < 1) { resDiv.style.display = 'none'; return; }
-        
-        const filtered = currentDB.filter(i => i && i.nama.toLowerCase().includes(input));
-        if(filtered.length > 0) {
-            resDiv.style.display = 'block';
-            filtered.forEach(item => {
-                resDiv.innerHTML += `
-                    <div class="search-item">
-                        <span>${item.nama}</span>
-                        <button class="btn-pilih" onclick="pilihBarang('${suffix}', ${item.id}, '${item.nama}')">PILIH</button>
-                    </div>`;
-            });
-        } else {
-            resDiv.innerHTML = '<div style="padding:10px">Barang tidak ditemukan</div>';
-        }
+        userAktif = n.toUpperCase();
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('staffDisplay').innerText = "🟢 Staff: " + userAktif;
     }
 
-    function pilihBarang(suffix, id, nama) {
-        const badge = document.getElementById('badge'+suffix);
-        badge.innerHTML = "Terpilih: " + nama;
-        badge.style.display = 'block';
-        badge.dataset.id = id;
-        document.getElementById('res'+suffix).style.display = 'none';
-        document.getElementById('search'+suffix).value = ''; 
-    }
+    // DATABASE SYNC
+    db.ref('stok_barang').on('value', snap => {
+        const val = snap.val();
+        dbBarang = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+        renderTabel();
+    });
+
+    db.ref('riwayat_aktivitas').on('value', snap => {
+        const val = snap.val();
+        dbLog = val ? Object.entries(val).map(([id, v]) => ({id, ...v})) : [];
+        renderLog();
+    });
 
     function renderTabel() {
         const b = document.getElementById('tabelBody'); b.innerHTML = '';
-        currentDB.forEach(i => {
-            if(!i) return;
-            const sisa = (i.awal || 0) - (i.ambil || 0);
+        dbBarang.forEach(i => {
+            const m = (parseInt(i.awal)||0)-(parseInt(i.ambil)||0);
             b.innerHTML += `<tr>
                 <td style="text-align:left">${i.nama}</td>
-                <td>${i.awal}</td>
-                <td style="color:red">-${i.ambil||0}</td>
-                <td style="font-weight:bold">${sisa}</td>
+                <td><input type="number" style="width:45px; background:none; color:white; border-bottom:1px solid #444;" value="${i.awal||0}" onchange="upd('${i.id}','awal',this.value)"></td>
+                <td style="color:var(--red)">-${i.ambil||0}</td>
+                <td><input type="number" style="width:45px; background:none; color:white; border-bottom:1px solid var(--green);" value="${i.sisa||0}" onchange="upd('${i.id}','sisa',this.value)"></td>
+                <td>${m}</td>
+                <td style="font-weight:bold; color:var(--yellow)">${m+(parseInt(i.sisa)||0)}</td>
             </tr>`;
         });
     }
 
-    async function simpan(tipe) {
-        let suffix = tipe === 'tf' ? 'Tf' : (tipe === 'ambil' ? 'Ambil' : 'Waste');
-        let id = document.getElementById('badge'+suffix).dataset.id;
-        let qty = parseInt(document.getElementById('qty'+suffix).value);
-        let sat = document.getElementById('satuan'+suffix).value;
-        let staff = document.getElementById('staff'+suffix)?.value || "SISTEM";
-        let finalTipe = (tipe === 'tf') ? document.getElementById('tipeTf').value : tipe;
-
-        if(!id || isNaN(qty)) return alert("Silakan PILIH barang dulu dan isi jumlah!");
-
-        // Update Logika Firebase
-        if(finalTipe === 'ambil') {
-            await dbRef.child(id).update({ ambil: (currentDB[id].ambil || 0) + qty });
-        } else if(finalTipe === 'tfin') {
-            await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) + qty });
-        } else if(finalTipe === 'tfout' || finalTipe === 'waste') {
-            await dbRef.child(id).update({ awal: (currentDB[id].awal || 0) - qty });
-        }
-
-        await logRef.push({
-            staff, item: currentDB[id].nama, qty, satuan: sat, tipe: finalTipe,
-            jam: new Date().toLocaleTimeString('id-ID'), tanggal: new Date().toLocaleDateString('en-CA')
+    function renderLog() {
+        const div = document.getElementById('logList'); div.innerHTML = '';
+        const hariIni = dbLog.filter(l => l.tanggal === tglSkg).reverse();
+        if(hariIni.length === 0) div.innerHTML = "<p style='text-align:center; opacity:0.3;'>Belum ada data.</p>";
+        hariIni.forEach(l => {
+            div.innerHTML += `<div class="log-item">
+                <button class="btn-del" onclick="batal('${l.id}','${l.tipe}','${l.itemId}',${l.qty})">BATAL</button>
+                <b>${l.tipe.toUpperCase()}</b>: ${l.item} (${l.qty})<br><small>${l.staff} | ${l.jam}</small>
+            </div>`;
         });
+    }
 
-        alert("Berhasil disimpan!");
+    async function simpan(t) {
+        let s = t==='tf'?'T':(t==='ambil'?'A':'W');
+        let box = document.getElementById('bdg'+s);
+        let id = box.dataset.id;
+        let q = parseInt(document.getElementById('qty'+s).value);
+        let ft = t==='tf'?document.getElementById('tfTipe').value : t;
+        
+        if(!id || isNaN(q) || q <= 0) return alert("Pilih barang dan jumlah!");
+        
+        const itm = dbBarang.find(x => x.id == id);
+        const ref = db.ref('stok_barang/'+id);
+
+        try {
+            if(ft==='ambil') await ref.update({ambil: (parseInt(itm.ambil)||0)+q});
+            else if(ft==='tfin') await ref.update({awal: (parseInt(itm.awal)||0)+q});
+            else await ref.update({awal: (parseInt(itm.awal)||0)-q});
+            
+            await db.ref('riwayat_aktivitas').push({
+                staff: userAktif, item: itm.nama, itemId: id, qty: q, tipe: ft, 
+                jam: new Date().toLocaleTimeString('id-ID'), tanggal: tglSkg
+            });
+
+            if(ft === 'ambil') cetak(ft, itm.nama, q);
+            
+            alert("Berhasil!");
+            box.style.display='none'; document.getElementById('qty'+s).value='';
+        } catch(e) { alert(e.message); }
+    }
+
+    function cetak(tipe, item, qty) {
+        document.getElementById('pTgl').innerText = tglSkg;
+        document.getElementById('pJam').innerText = new Date().toLocaleTimeString('id-ID');
+        document.getElementById('pStf').innerText = userAktif;
+        document.getElementById('pIsi').innerHTML = `<b>[${tipe.toUpperCase()}]</b><br>${item}<br>Qty: ${qty}`;
+        document.getElementById('printArea').style.display = 'block';
+        window.print();
+        document.getElementById('printArea').style.display = 'none';
+    }
+
+    function cari(s) {
+        let v = document.getElementById('src'+s).value.toLowerCase();
+        let r = document.getElementById('res'+s); r.innerHTML = '';
+        if(v.length<1) return r.style.display='none';
+        r.style.display='block';
+        dbBarang.filter(i=>i.nama.toLowerCase().includes(v)).forEach(it => {
+            r.innerHTML += `<div class="search-item"><span>${it.nama}</span><button style="background:var(--green); color:white; padding:4px 8px; border-radius:4px;" onclick="pilih('${s}','${it.id}','${it.nama}')">PILIH</button></div>`;
+        });
+    }
+
+    function pilih(s,id,n) { 
+        let b=document.getElementById('bdg'+s); b.innerHTML="🎯 "+n; b.style.display='block'; b.dataset.id=id; 
+        document.getElementById('res'+s).style.display='none'; document.getElementById('src'+s).value = '';
+    }
+
+    function exportExcel() {
+        const table = document.querySelector("#rekapArea table");
+        if (!table) return alert("Cari data dulu!");
+        XLSX.writeFile(XLSX.utils.table_to_book(table), `Rekap_${document.getElementById('filterTgl').value}.xlsx`);
+    }
+
+    async function resetHarian() {
+        if(prompt("Password:") !== "123") return alert("Salah!");
+        let up = {}; dbBarang.forEach(i => { up[`stok_barang/${i.id}/ambil`]=0; up[`stok_barang/${i.id}/sisa`]=0; });
+        await db.ref().update(up);
+        await db.ref('riwayat_aktivitas').remove();
         location.reload();
+    }
+
+    function bukaModal() { document.getElementById('modalRekap').style.display='block'; }
+    function tutupModal() { document.getElementById('modalRekap').style.display='none'; }
+    function upd(id,c,v) { db.ref('stok_barang/'+id).update({[c]:parseInt(v)||0}); }
+    
+    function prosesRekap() {
+        const t = document.getElementById('filterTgl').value;
+        const fl = dbLog.filter(l => l.tanggal === t);
+        if(fl.length===0) return document.getElementById('rekapArea').innerHTML = "Kosong.";
+        let h = `<table border="1" style="width:100%; color:white; border-collapse:collapse; font-size:12px;"><tr><th>Jam</th><th>Staff</th><th>Barang</th><th>Qty</th></tr>`;
+        fl.forEach(l => h += `<tr><td>${l.jam}</td><td>${l.staff}</td><td>${l.item}</td><td>${l.qty}</td></tr>`);
+        document.getElementById('rekapArea').innerHTML = h + "</table>";
+    }
+
+    async function batal(logId, tipe, itmId, qty) {
+        if(!confirm("Hapus data ini?")) return;
+        const itm = dbBarang.find(x => x.id == itmId);
+        const ref = db.ref('stok_barang/' + itmId);
+        const q = parseInt(qty) || 0;
+        if(tipe === 'ambil') await ref.update({ ambil: (parseInt(itm.ambil) || 0) - q });
+        else if(tipe === 'tfin') await ref.update({ awal: (parseInt(itm.awal) || 0) - q });
+        else await ref.update({ awal: (parseInt(itm.awal) || 0) + q });
+        await db.ref('riwayat_aktivitas/' + logId).remove();
     }
 </script>
 </body>
