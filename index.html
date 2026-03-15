@@ -3,147 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTOK CIPINANG FRESH ✨</title>
+    <title>SISTOK CIPINANG ULTIMATE ✨</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --purple: #a855f7; --blue: #3b82f6; --red: #ef4444; --green: #22c55e; --yellow: #eab308; }
+        :root { --purple: #a855f7; --blue: #3b82f6; --red: #ef4444; --green: #22c55e; --yellow: #eab308; --emerald: #10b981; }
         body { margin: 0; padding: 10px; font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; }
-        .container { max-width: 1400px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .grid-input { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 14px; }
-        button { cursor: pointer; border: none; font-weight: bold; transition: 0.3s; }
-        button:hover { opacity: 0.8; }
-        .main-btn { width: 100%; padding: 12px; border-radius: 8px; color: white; margin-top: 10px; }
-        .search-res { position: absolute; background: #1e293b; width: calc(100% - 30px); max-height: 200px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--blue); z-index: 1000; display: none; }
-        .search-item { padding: 12px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .selected-box { background: rgba(34, 197, 94, 0.2); color: var(--green); padding: 10px; border-radius: 8px; margin: 10px 0; display: none; border: 1px solid var(--green); font-size: 13px; }
+        .container { max-width: 1550px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .btn-header { padding: 8px 12px; border-radius: 8px; border: none; font-size: 11px; font-weight: bold; cursor: pointer; color: white; margin-left: 5px; }
+        .grid-input { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        .card-stockin { border-top: 6px solid var(--emerald); }
+        .card-ambil { border-top: 6px solid var(--purple); }
+        .card-tf { border-top: 6px solid var(--blue); }
+        .card-waste { border-top: 6px solid var(--red); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; margin-top: 10px; transition: 0.3s; }
+        .search-res { background: #1e293b; border-radius: 10px; max-height: 150px; overflow-y: auto; display: none; position: absolute; width: 90%; z-index: 10; border: 1px solid #334155; }
+        .search-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .btn-pilih { background: var(--green); padding: 4px 10px; border-radius: 5px; border: none; color: white; cursor: pointer; font-size: 11px; }
+        .selected-box { background: rgba(16, 185, 129, 0.2); color: var(--emerald); padding: 10px; border-radius: 10px; margin: 10px 0; display: none; font-size: 13px; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { padding: 12px; background: rgba(255,255,255,0.1); color: var(--green); font-size: 11px; }
-        td { padding: 12px; text-align: center; border-bottom: 1px solid #1e293b; font-size: 13px; }
-        .log-item { background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--purple); position: relative; }
-        .btn-del { position: absolute; right: 10px; top: 15px; background: var(--red); color: white; padding: 5px 10px; border-radius: 5px; font-size: 11px; }
-        
-        /* Modals */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: #1e293b; margin: 10% auto; padding: 25px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid var(--blue); }
-        
-        /* Login Layer */
-        #loginOverlay { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: #1e293b; padding: 40px; border-radius: 25px; border: 1px solid var(--purple); width: 85%; max-width: 350px; text-align: center; }
-
-        /* Print Style */
-        @media print {
-            body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute; left: 0; top: 0; width: 58mm; color: black !important; background: white !important; }
-        }
-        #printArea { display: none; }
+        td { padding: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+        .log-item { background: rgba(255, 255, 255, 0.03); padding: 10px; border-radius: 10px; margin-bottom: 8px; position: relative; border-left: 4px solid var(--purple); font-size: 12px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); }
+        .modal-content { background: #1e1b4b; margin: 5% auto; padding: 25px; width: 95%; max-width: 800px; border-radius: 20px; border: 1px solid var(--blue); }
+        .btn-del { position: absolute; right: 10px; top: 10px; background: none; border: 1px solid var(--red); color: var(--red); cursor: pointer; font-size: 10px; border-radius: 4px; padding: 2px 8px; }
+        #user-info { background: rgba(168, 85, 247, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--purple); }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="login-card">
-        <h2 style="color:var(--purple); margin-bottom:5px;">SISTOK LOGIN</h2>
-        <p style="opacity:0.6; font-size:12px; margin-bottom:20px;">Masukkan nama untuk memproses stok</p>
-        <input type="text" id="userInput" placeholder="Nama Anda..." autocomplete="off">
-        <button class="main-btn" style="background:var(--purple);" onclick="prosesLogin()">MASUK</button>
+<div id="modalLogin" class="modal" style="display: flex; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h2 style="color: var(--purple);">👤 LOGIN STAFF</h2>
+        <input type="text" id="inputLoginNama" placeholder="Ketik Nama Anda...">
+        <button onclick="login()" class="main-btn" style="background: var(--purple);">MASUK SISTEM</button>
     </div>
 </div>
 
 <div id="modalRekap" class="modal">
     <div class="modal-content">
-        <h3 style="margin:0; color:var(--blue);">📊 Rekap Aktivitas</h3>
-        <input type="date" id="filterTgl">
-        <div style="display:flex; gap:10px;">
-            <button onclick="prosesRekap()" style="background:var(--blue); color:white; flex:1; padding:12px; border-radius:8px;">CARI</button>
-            <button onclick="exportExcel()" style="background:var(--green); color:white; flex:1; padding:12px; border-radius:8px;">EXCEL</button>
+        <h3 style="color: var(--yellow); margin-top:0;">📊 LAPORAN REKAP AKTIVITAS</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="date" id="filterTglRekap" style="flex: 2; margin: 0;">
+            <button onclick="prosesCariRekap()" style="flex: 1; background: var(--yellow); border: none; border-radius: 10px; color: black; font-weight: bold; cursor: pointer;">TAMPILKAN DATA</button>
         </div>
-        <div id="rekapArea" style="max-height:300px; overflow-y:auto; margin:15px 0;"></div>
-        <button onclick="tutupModal()" style="background:var(--red); color:white; width:100%; padding:12px; border-radius:8px;">TUTUP</button>
+        <div id="rekapArea" style="max-height: 450px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;">
+            <p style="text-align: center; opacity: 0.5;">Pilih tanggal untuk melihat ringkasan (In, Ambil, Waste, Mutasi).</p>
+        </div>
+        <button onclick="tutupModal()" style="background: var(--red); border:none; padding:12px; color:white; border-radius:10px; width:100%; margin-top:20px; cursor:pointer; font-weight:bold;">TUTUP LAPORAN</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
         <div>
-            <h1 style="margin:0; font-size: 1.5rem; color: var(--purple);">SISTOK CIPINANG ✨</h1>
-            <p id="staffDisplay" style="margin:0; color:var(--green); font-size: 12px; font-weight:bold;">Staff: -</p>
+            <h1 style="margin:0; font-size: 1.8rem; color: var(--purple); text-shadow: 0 0 10px var(--purple);">SISTOK CIPINANG ✨</h1>
+            <div style="display: flex; gap: 15px; align-items: center; margin-top: 5px;">
+                <p style="margin:0; opacity: 0.7; font-size: 12px;">📅 <span id="tglSkrg"></span></p>
+                <div id="user-info"><span id="userNameDisplay">Staff</span><button onclick="logout()" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:10px; font-weight:bold;">[GANTI]</button></div>
+            </div>
         </div>
-        <div style="display:flex; gap:8px;">
-            <button onclick="resetHarian()" style="background:var(--red); padding:8px 12px; border-radius:8px; color:white; font-size:12px;">🧹 RESET</button>
-            <button onclick="bukaModal()" style="background:var(--yellow); padding:8px 12px; border-radius:8px; color:white; font-size:12px;">📊 REKAP</button>
+        <div class="report-btns">
+            <button class="btn-header" style="background: var(--red);" onclick="resetHarian()">🧹 CLOSING</button>
+            <button class="btn-header" style="background: var(--yellow); color: black;" onclick="bukaModalRekap()">📊 REKAP HARIAN</button>
+            <button class="btn-header" style="background: var(--green);" onclick="unduhExcel()">EXCEL</button>
         </div>
     </div>
 
     <div class="grid-input">
-        <div class="card">
-            <h4 style="margin:0; color:var(--purple);">📦 AMBIL</h4>
-            <input type="text" id="srcA" placeholder="Cari Barang..." oninput="cari('A')" autocomplete="off">
-            <div id="resA" class="search-res"></div>
-            <div id="bdgA" class="selected-box"></div>
-            <input type="number" id="qtyA" placeholder="Jumlah">
-            <select id="satA"></select>
-            <button class="main-btn" style="background: var(--purple);" onclick="simpan('ambil')">SIMPAN & CETAK</button>
+        <div class="card card-stockin">
+            <h4 style="color: var(--emerald); margin:0;">🟢 STOCK IN (PUSAT)</h4>
+            <div style="position:relative; margin-top: 10px;">
+                <input type="text" id="searchIn" placeholder="🔍 Cari Barang Suplai..." onkeyup="cari('In')">
+                <div id="resIn" class="search-res"></div>
+            </div>
+            <div id="badgeIn" class="selected-box"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="qtyIn" placeholder="Qty" style="flex: 2;">
+                <select id="satuanIn" style="flex: 1;"></select>
+            </div>
+            <input type="text" id="alasanIn" placeholder="No. Surat Jalan / DO">
+            <button class="main-btn" style="background: var(--emerald);" onclick="simpan('stockin')">TAMBAH STOK</button>
         </div>
 
-        <div class="card">
-            <h4 style="margin:0; color:var(--blue);">🔄 TRANSFER</h4>
-            <select id="tfTipe"><option value="tfin">TF IN (Masuk)</option><option value="tfout">TF OUT (Keluar)</option></select>
-            <input type="text" id="srcT" placeholder="Cari Barang..." oninput="cari('T')" autocomplete="off">
-            <div id="resT" class="search-res"></div>
-            <div id="bdgT" class="selected-box"></div>
-            <input type="number" id="qtyT" placeholder="Jumlah">
-            <select id="satT"></select>
+        <div class="card card-ambil">
+            <h4 style="color: var(--purple); margin:0;">🟣 AMBIL STOK</h4>
+            <div style="position:relative; margin-top: 10px;">
+                <input type="text" id="searchAmbil" placeholder="🔍 Cari Barang..." onkeyup="cari('Ambil')">
+                <div id="resAmbil" class="search-res"></div>
+            </div>
+            <div id="badgeAmbil" class="selected-box" style="background:rgba(168, 85, 247, 0.2); color:var(--purple);"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="qtyAmbil" placeholder="Qty" style="flex: 2;">
+                <select id="satuanAmbil" style="flex: 1;"></select>
+            </div>
+            <button class="main-btn" style="background: var(--purple);" onclick="simpan('ambil')">SIMPAN AMBIL</button>
+        </div>
+
+        <div class="card card-tf">
+            <h4 style="color: var(--blue); margin:0;">🔵 MUTASI (TF)</h4>
+            <select id="tipeTf"><option value="tfin">TF IN (Masuk)</option><option value="tfout">TF OUT (Keluar)</option></select>
+            <div style="position:relative;">
+                <input type="text" id="searchTf" placeholder="🔍 Cari Barang..." onkeyup="cari('Tf')">
+                <div id="resTf" class="search-res"></div>
+            </div>
+            <div id="badgeTf" class="selected-box" style="background:rgba(59, 130, 246, 0.2); color:var(--blue);"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="qtyTf" placeholder="Qty" style="flex: 2;">
+                <select id="satuanTf" style="flex: 1;"></select>
+            </div>
+            <input type="text" id="alasanTf" placeholder="Alasan Mutasi">
             <button class="main-btn" style="background: var(--blue);" onclick="simpan('tf')">PROSES TF</button>
         </div>
 
-        <div class="card">
-            <h4 style="margin:0; color:var(--red);">⚠️ WASTE</h4>
-            <input type="text" id="srcW" placeholder="Cari Barang..." oninput="cari('W')" autocomplete="off">
-            <div id="resW" class="search-res"></div>
-            <div id="bdgW" class="selected-box"></div>
-            <input type="number" id="qtyW" placeholder="Jumlah">
-            <select id="satW"></select>
+        <div class="card card-waste">
+            <h4 style="color: var(--red); margin:0;">🔴 WASTE</h4>
+            <div style="position:relative; margin-top: 10px;">
+                <input type="text" id="searchWaste" placeholder="🔍 Cari Barang..." onkeyup="cari('Waste')">
+                <div id="resWaste" class="search-res"></div>
+            </div>
+            <div id="badgeWaste" class="selected-box" style="background:rgba(239, 68, 68, 0.2); color:var(--red);"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="qtyWaste" placeholder="Qty" style="flex: 2;">
+                <select id="satuanWaste" style="flex: 1;"></select>
+            </div>
+            <input type="text" id="alasanWaste" placeholder="Alasan Waste">
             <button class="main-btn" style="background: var(--red);" onclick="simpan('waste')">KIRIM WASTE</button>
         </div>
     </div>
 
     <div class="card">
-        <h4 style="margin-top:0;">📊 MONITORING STOK</h4>
+        <h4 style="color: var(--green); margin:0;">📊 MONITORING STOK REAL-TIME</h4>
+        <input type="text" id="pencarianTabel" placeholder="🔍 Ketik nama barang untuk memfilter..." onkeyup="filterTabelStok()" style="border: 1px solid rgba(34, 197, 94, 0.3); background: rgba(255,255,255,0.05); margin-top: 15px;">
         <div style="overflow-x: auto;">
             <table>
                 <thead>
-                    <tr><th>Barang</th><th>Awal</th><th>Ambil</th><th>Sisa</th><th>MURNI</th><th>TOTAL</th></tr>
+                    <tr>
+                        <th style="text-align:left">Nama Barang</th>
+                        <th>Awal</th>
+                        <th>Ambil</th>
+                        <th>Sisa</th>
+                        <th>AKHIR (Murni)</th>
+                        <th style="color:var(--yellow)">AKHIR (TOTAL)</th>
+                    </tr>
                 </thead>
                 <tbody id="tabelBody"></tbody>
             </table>
         </div>
     </div>
 
-    <div class="card" style="margin-top:20px;">
-        <h4>📑 AKTIVITAS HARI INI</h4>
-        <div id="logList"></div>
-    </div>
-</div>
-
-<div id="printArea">
-    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:5px;">
-        <strong>SISTOK CIPINANG ✨</strong><br>
-        <small id="pTgl"></small>
-    </div>
-    <div id="pIsi" style="padding:10px 0; font-size:12px;"></div>
-    <div style="font-size:10px; border-top:1px dashed #000; padding-top:5px;">
-        Staff: <span id="pStf"></span> | <span id="pJam"></span>
+    <div class="card" style="margin-top: 20px;">
+        <h4 style="margin:0;">📑 AKTIVITAS HARI INI</h4>
+        <div id="logList" style="max-height: 250px; overflow-y: auto; margin-top:10px;"></div>
     </div>
 </div>
 
 <script>
-    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBViL4PQMHXts_UWPu2leYs1ugFAMG_S4w",
         authDomain: "sistok-cipinang-37ae6.firebaseapp.com",
@@ -154,157 +174,192 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let dbBarang = [];
-    let dbLog = [];
-    let userAktif = "";
-    const tglSkg = new Date().toLocaleDateString('en-CA');
-    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BALL", "JRG", "BOX", "KARTON", "L", "BOTOL"];
-
-    // Inisialisasi Dropdown Satuan
-    ['A', 'T', 'W'].forEach(s => {
-        document.getElementById('sat'+s).innerHTML = uom.map(u => `<option value="${u}">${u}</option>`).join('');
-    });
-
-    // FUNGSI LOGIN
-    function prosesLogin() {
-        const n = document.getElementById('userInput').value.trim();
-        if (n.length < 2) return alert("Masukkan nama minimal 2 huruf!");
-        
-        userAktif = n.toUpperCase();
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('staffDisplay').innerText = "🟢 Staff: " + userAktif;
+    let dataBarang = [];
+    let riwayatAll = [];
+    let currentStaff = localStorage.getItem('staffName') || "";
+    const today = new Date().toLocaleDateString('en-CA');
+    
+    function checkLogin() {
+        if (!currentStaff) { document.getElementById('modalLogin').style.display = 'flex'; } 
+        else { document.getElementById('modalLogin').style.display = 'none'; document.getElementById('userNameDisplay').innerText = "👤 Staff: " + currentStaff; }
     }
+    function login() {
+        const n = document.getElementById('inputLoginNama').value.trim();
+        if (n.length < 2) return alert("Nama minimal 2 karakter!");
+        localStorage.setItem('staffName', n); currentStaff = n; checkLogin();
+    }
+    function logout() { localStorage.removeItem('staffName'); location.reload(); }
 
-    // DATABASE SYNC
+    document.getElementById('tglSkrg').innerText = today;
+    const uom = ["PACK", "ROLL", "KG", "GR", "PCS", "BALL", "JRG", "BOX", "KARTON", "L", "BOTOL"];
+    ['In', 'Ambil', 'Tf', 'Waste'].forEach(s => document.getElementById('satuan'+s).innerHTML = uom.map(u => `<option value="${u}">${u}</option>`).join(''));
+
+    checkLogin();
+
     db.ref('stok_barang').on('value', snap => {
         const val = snap.val();
-        dbBarang = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+        dataBarang = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
         renderTabel();
     });
 
     db.ref('riwayat_aktivitas').on('value', snap => {
-        const val = snap.val();
-        dbLog = val ? Object.entries(val).map(([id, v]) => ({id, ...v})) : [];
-        renderLog();
+        const logs = snap.val();
+        riwayatAll = logs ? Object.entries(logs).map(([id, val]) => ({id, ...val})) : [];
+        const div = document.getElementById('logList'); div.innerHTML = '';
+        riwayatAll.filter(l => l.tanggal === today).reverse().forEach(l => {
+            let color = l.tipe === 'stockin' ? 'var(--emerald)' : (l.tipe === 'ambil' ? 'var(--purple)' : 'white');
+            div.innerHTML += `<div class="log-item" style="border-left-color:${color}">
+                <button class="btn-del" onclick="hapus('${l.id}','${l.tipe}',${l.itemId},${l.qty})">BATAL</button>
+                <b style="color:${color}">${l.tipe.toUpperCase()}</b>: ${l.item} (${l.qty})<br>
+                <small>${l.staff} | ${l.jam} ${l.alasan ? '| '+l.alasan : ''}</small>
+            </div>`;
+        });
     });
 
     function renderTabel() {
         const b = document.getElementById('tabelBody'); b.innerHTML = '';
-        dbBarang.forEach(i => {
-            const m = (parseInt(i.awal)||0)-(parseInt(i.ambil)||0);
+        dataBarang.forEach(i => {
+            if(!i) return;
+            const murni = (i.awal || 0) - (i.ambil || 0);
+            const total = murni + (i.sisa || 0);
             b.innerHTML += `<tr>
                 <td style="text-align:left">${i.nama}</td>
-                <td><input type="number" style="width:45px; background:none; color:white; border-bottom:1px solid #444;" value="${i.awal||0}" onchange="upd('${i.id}','awal',this.value)"></td>
+                <td><input type="number" style="width:60px; background:none; color:white; border-bottom:1px solid grey; text-align:center;" value="${i.awal || 0}" onchange="auditEdit(${i.id},'awal',this.value)"></td>
                 <td style="color:var(--red)">-${i.ambil||0}</td>
-                <td><input type="number" style="width:45px; background:none; color:white; border-bottom:1px solid var(--green);" value="${i.sisa||0}" onchange="upd('${i.id}','sisa',this.value)"></td>
-                <td>${m}</td>
-                <td style="font-weight:bold; color:var(--yellow)">${m+(parseInt(i.sisa)||0)}</td>
+                <td><input type="number" style="width:60px; background:none; color:white; border-bottom:1px solid var(--green); text-align:center;" value="${i.sisa || 0}" onchange="auditEdit(${i.id},'sisa',this.value)"></td>
+                <td>${murni}</td>
+                <td style="font-weight:bold; color:var(--yellow);">${total}</td>
             </tr>`;
         });
+        filterTabelStok();
     }
 
-    function renderLog() {
-        const div = document.getElementById('logList'); div.innerHTML = '';
-        const hariIni = dbLog.filter(l => l.tanggal === tglSkg).reverse();
-        if(hariIni.length === 0) div.innerHTML = "<p style='text-align:center; opacity:0.3;'>Belum ada data.</p>";
-        hariIni.forEach(l => {
-            div.innerHTML += `<div class="log-item">
-                <button class="btn-del" onclick="batal('${l.id}','${l.tipe}','${l.itemId}',${l.qty})">BATAL</button>
-                <b>${l.tipe.toUpperCase()}</b>: ${l.item} (${l.qty})<br><small>${l.staff} | ${l.jam}</small>
-            </div>`;
+    function filterTabelStok() {
+        const f = document.getElementById("pencarianTabel").value.toLowerCase();
+        const tr = document.getElementById("tabelBody").getElementsByTagName("tr");
+        for (let i = 0; i < tr.length; i++) {
+            const td = tr[i].getElementsByTagName("td")[0];
+            if (td) tr[i].style.display = td.innerText.toLowerCase().includes(f) ? "" : "none";
+        }
+    }
+
+    async function simpan(tipe) {
+        let s = tipe === 'stockin' ? 'In' : (tipe === 'tf' ? 'Tf' : (tipe === 'ambil' ? 'Ambil' : 'Waste'));
+        let id = document.getElementById('badge'+s).dataset.id;
+        let qty = parseInt(document.getElementById('qty'+s).value);
+        let alasan = document.getElementById('alasan'+s) ? document.getElementById('alasan'+s).value : "";
+        let ft = tipe === 'tf' ? document.getElementById('tipeTf').value : tipe;
+
+        if(!id || isNaN(qty)) return alert("Isi data barang & Qty!");
+        if((tipe === 'stockin' || tipe === 'tf' || tipe === 'waste') && !alasan) return alert("Mohon isi keterangan/alasan!");
+
+        const target = dataBarang.find(x => x.id == id);
+        const ref = db.ref('stok_barang/' + id);
+
+        if(ft === 'ambil') await ref.update({ ambil: (target.ambil || 0) + qty });
+        else if(ft === 'stockin' || ft === 'tfin') await ref.update({ awal: (target.awal || 0) + qty });
+        else await ref.update({ awal: (target.awal || 0) - qty });
+
+        await db.ref('riwayat_aktivitas').push({
+            staff: currentStaff, item: target.nama, itemId: id, qty, tipe: ft, alasan,
+            satuan: document.getElementById('satuan'+s).value, jam: new Date().toLocaleTimeString(), tanggal: today
         });
+
+        alert("Berhasil disimpan!");
+        document.getElementById('qty'+s).value = '';
+        if(document.getElementById('alasan'+s)) document.getElementById('alasan'+s).value = '';
+        document.getElementById('badge'+s).style.display = 'none';
+        document.getElementById('search'+s).value = '';
     }
 
-    async function simpan(t) {
-        let s = t==='tf'?'T':(t==='ambil'?'A':'W');
-        let box = document.getElementById('bdg'+s);
-        let id = box.dataset.id;
-        let q = parseInt(document.getElementById('qty'+s).value);
-        let ft = t==='tf'?document.getElementById('tfTipe').value : t;
-        
-        if(!id || isNaN(q) || q <= 0) return alert("Pilih barang dan jumlah!");
-        
-        const itm = dbBarang.find(x => x.id == id);
-        const ref = db.ref('stok_barang/'+id);
-
-        try {
-            if(ft==='ambil') await ref.update({ambil: (parseInt(itm.ambil)||0)+q});
-            else if(ft==='tfin') await ref.update({awal: (parseInt(itm.awal)||0)+q});
-            else await ref.update({awal: (parseInt(itm.awal)||0)-q});
-            
-            await db.ref('riwayat_aktivitas').push({
-                staff: userAktif, item: itm.nama, itemId: id, qty: q, tipe: ft, 
-                jam: new Date().toLocaleTimeString('id-ID'), tanggal: tglSkg
-            });
-
-            if(ft === 'ambil') cetak(ft, itm.nama, q);
-            
-            alert("Berhasil!");
-            box.style.display='none'; document.getElementById('qty'+s).value='';
-        } catch(e) { alert(e.message); }
+    // --- FITUR REKAP HARIAN ---
+    function bukaModalRekap() {
+        document.getElementById('modalRekap').style.display = 'block';
+        document.getElementById('filterTglRekap').value = today;
     }
 
-    function cetak(tipe, item, qty) {
-        document.getElementById('pTgl').innerText = tglSkg;
-        document.getElementById('pJam').innerText = new Date().toLocaleTimeString('id-ID');
-        document.getElementById('pStf').innerText = userAktif;
-        document.getElementById('pIsi').innerHTML = `<b>[${tipe.toUpperCase()}]</b><br>${item}<br>Qty: ${qty}`;
-        document.getElementById('printArea').style.display = 'block';
-        window.print();
-        document.getElementById('printArea').style.display = 'none';
-    }
+    function prosesCariRekap() {
+        const tgl = document.getElementById('filterTglRekap').value;
+        const filtered = riwayatAll.filter(l => l.tanggal === tgl);
+        const area = document.getElementById('rekapArea');
 
-    function cari(s) {
-        let v = document.getElementById('src'+s).value.toLowerCase();
-        let r = document.getElementById('res'+s); r.innerHTML = '';
-        if(v.length<1) return r.style.display='none';
-        r.style.display='block';
-        dbBarang.filter(i=>i.nama.toLowerCase().includes(v)).forEach(it => {
-            r.innerHTML += `<div class="search-item"><span>${it.nama}</span><button style="background:var(--green); color:white; padding:4px 8px; border-radius:4px;" onclick="pilih('${s}','${it.id}','${it.nama}')">PILIH</button></div>`;
+        if(filtered.length === 0) {
+            area.innerHTML = `<p style="text-align:center; padding:20px;">Tidak ada data aktivitas untuk tanggal ${tgl}</p>`;
+            return;
+        }
+
+        let rekap = {};
+        filtered.forEach(l => {
+            if(!rekap[l.item]) rekap[l.item] = { in: 0, ambil: 0, tf: 0, waste: 0, unit: l.satuan || '' };
+            const q = parseInt(l.qty) || 0;
+            if(l.tipe === 'stockin') rekap[l.item].in += q;
+            else if(l.tipe === 'ambil') rekap[l.item].ambil += q;
+            else if(l.tipe === 'waste') rekap[l.item].waste += q;
+            else if(l.tipe === 'tfin') rekap[l.item].tf += q;
+            else if(l.tipe === 'tfout') rekap[l.item].tf -= q;
         });
+
+        let html = `<table><thead><tr><th style="text-align:left">Barang</th><th>In Pusat</th><th>Ambil</th><th>Waste</th><th>Mutasi</th></tr></thead><tbody>`;
+        for(let item in rekap) {
+            const r = rekap[item];
+            html += `<tr>
+                <td style="text-align:left">${item}</td>
+                <td style="color:var(--emerald)">+${r.in}</td>
+                <td style="color:var(--purple)">-${r.ambil}</td>
+                <td style="color:var(--red)">-${r.waste}</td>
+                <td style="color:var(--blue)">${r.tf > 0 ? '+'+r.tf : r.tf}</td>
+            </tr>`;
+        }
+        area.innerHTML = html + `</tbody></table>`;
     }
 
-    function pilih(s,id,n) { 
-        let b=document.getElementById('bdg'+s); b.innerHTML="🎯 "+n; b.style.display='block'; b.dataset.id=id; 
-        document.getElementById('res'+s).style.display='none'; document.getElementById('src'+s).value = '';
+    function tutupModal() { document.getElementById('modalRekap').style.display = 'none'; }
+
+    // --- FUNGSI PENDUKUNG ---
+    async function hapus(k, t, id, q) {
+        if(!confirm("Batalkan aktivitas ini?")) return;
+        const ref = db.ref('stok_barang/' + id);
+        const target = dataBarang.find(x => x.id == id);
+        if(t === 'ambil') await ref.update({ ambil: (target.ambil || 0) - q });
+        else if(t === 'stockin' || t === 'tfin') await ref.update({ awal: (target.awal || 0) - q });
+        else if(t === 'tfout' || t === 'waste') await ref.update({ awal: (target.awal || 0) + q });
+        await db.ref('riwayat_aktivitas/' + k).remove();
     }
 
-    function exportExcel() {
-        const table = document.querySelector("#rekapArea table");
-        if (!table) return alert("Cari data dulu!");
-        XLSX.writeFile(XLSX.utils.table_to_book(table), `Rekap_${document.getElementById('filterTgl').value}.xlsx`);
+    async function auditEdit(id, col, val) {
+        const target = dataBarang.find(x => x.id == id);
+        await db.ref('stok_barang/'+id).update({ [col]: parseInt(val) || 0 });
+        await db.ref('riwayat_aktivitas').push({ staff: "AUDIT", item: target.nama, itemId: id, qty: val, tipe: "audit", jam: new Date().toLocaleTimeString(), tanggal: today });
     }
 
     async function resetHarian() {
-        if(prompt("Password:") !== "123") return alert("Salah!");
-        let up = {}; dbBarang.forEach(i => { up[`stok_barang/${i.id}/ambil`]=0; up[`stok_barang/${i.id}/sisa`]=0; });
-        await db.ref().update(up);
-        await db.ref('riwayat_aktivitas').remove();
-        location.reload();
+        if (!confirm("Closing akan meriset data AMBIL & SISA. Lanjutkan?")) return;
+        const updates = {};
+        dataBarang.forEach(i => { updates[`stok_barang/${i.id}/ambil`] = 0; updates[`stok_barang/${i.id}/sisa`] = 0; });
+        await db.ref('riwayat_aktivitas').push({ staff: currentStaff, item: "SYSTEM", qty: "RESET", tipe: "reset", jam: new Date().toLocaleTimeString(), tanggal: today });
+        await db.ref().update(updates); alert("Closing Berhasil!");
     }
 
-    function bukaModal() { document.getElementById('modalRekap').style.display='block'; }
-    function tutupModal() { document.getElementById('modalRekap').style.display='none'; }
-    function upd(id,c,v) { db.ref('stok_barang/'+id).update({[c]:parseInt(v)||0}); }
-    
-    function prosesRekap() {
-        const t = document.getElementById('filterTgl').value;
-        const fl = dbLog.filter(l => l.tanggal === t);
-        if(fl.length===0) return document.getElementById('rekapArea').innerHTML = "Kosong.";
-        let h = `<table border="1" style="width:100%; color:white; border-collapse:collapse; font-size:12px;"><tr><th>Jam</th><th>Staff</th><th>Barang</th><th>Qty</th></tr>`;
-        fl.forEach(l => h += `<tr><td>${l.jam}</td><td>${l.staff}</td><td>${l.item}</td><td>${l.qty}</td></tr>`);
-        document.getElementById('rekapArea').innerHTML = h + "</table>";
+    function cari(s) {
+        const v = document.getElementById('search'+s).value.toLowerCase();
+        const res = document.getElementById('res'+s); res.innerHTML = '';
+        if(v.length < 1) return res.style.display = 'none';
+        res.style.display = 'block';
+        dataBarang.filter(i => i && i.nama.toLowerCase().includes(v)).forEach(item => {
+            res.innerHTML += `<div class="search-item"><span>${item.nama}</span><button class="btn-pilih" onclick="pilih('${s}',${item.id},'${item.nama}')">PILIH</button></div>`;
+        });
     }
 
-    async function batal(logId, tipe, itmId, qty) {
-        if(!confirm("Hapus data ini?")) return;
-        const itm = dbBarang.find(x => x.id == itmId);
-        const ref = db.ref('stok_barang/' + itmId);
-        const q = parseInt(qty) || 0;
-        if(tipe === 'ambil') await ref.update({ ambil: (parseInt(itm.ambil) || 0) - q });
-        else if(tipe === 'tfin') await ref.update({ awal: (parseInt(itm.awal) || 0) - q });
-        else await ref.update({ awal: (parseInt(itm.awal) || 0) + q });
-        await db.ref('riwayat_aktivitas/' + logId).remove();
+    function pilih(s, id, nama) {
+        const b = document.getElementById('badge'+s);
+        b.innerHTML = "🎯 " + nama; b.style.display = 'block'; b.dataset.id = id;
+        document.getElementById('res'+s).style.display = 'none';
+    }
+
+    function unduhExcel() {
+        const ws = XLSX.utils.json_to_sheet(dataBarang.map(i => ({ Barang: i.nama, Awal: i.awal, Ambil: i.ambil, Sisa: i.sisa, Total: (i.awal-i.ambil)+i.sisa })));
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Stok");
+        XLSX.writeFile(wb, `Audit_Cipinang_${today}.xlsx`);
     }
 </script>
 </body>
